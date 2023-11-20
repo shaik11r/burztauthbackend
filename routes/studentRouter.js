@@ -3,7 +3,25 @@ const studentModel = require("../model/studentModel");
 const studentRouter = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const isUserAuthorized = require("../middleware/isuserAuthorized");
+
+const isUserAuthorized = (req, res, next) => {
+  try {
+    if (req.headers.authorization) {
+      const token = req.headers.authorization;
+      req.currentUser = jwt.verify(token, "s3cret");
+      next();
+      return;
+    } else {
+      res.json({
+        error: "ERROR! : PLease sign In",
+      });
+    }
+  } catch {
+    res.json({
+      error: "Error : Unauthorized Request",
+    });
+  }
+};
 
 studentRouter.post("/signup", async (req, res) => {
   const { username, password } = req.body;
